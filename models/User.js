@@ -63,19 +63,27 @@ userSchema.statics.findByEmail = async function (email) {
     }
 }
 
+userSchema.statics.findByToken = async function (token) {
+    try {
+        const user = await this.findOne({ _id: token }).select('-password -salt')
+        return user;
+    } catch (error) {
+        throw "Error occur when find user by token"
+    }
+}
 
 
 userSchema.statics.updateUser = async function (email, fields = {}) {
     try {
         const { username, bio, password } = fields
         let user = await this.findByEmail(email)
-        if (user){
-            const updateUser ={
+        if (user) {
+            const updateUser = {
                 ...(username && { username }),
                 ...(bio && { bio }),
                 ...(password && { password: await bcrypt.hash(password, user.salt) })
             }
-            user =_.merge(user, updateUser)
+            user = _.merge(user, updateUser)
             await user.save()
             return user
         }

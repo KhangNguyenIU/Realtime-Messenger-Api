@@ -31,7 +31,7 @@ const login = async (req, res) => {
             error: "Invalid Credentials"
         })
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         return res.status(400).json({
             message: error
         })
@@ -72,4 +72,19 @@ const register = async (req, res) => {
     }
 }
 
-module.exports = { login, register }
+const authUser = async (req, res)=>{
+    try{
+        const user = await UserSchema.findByToken(req.user)
+        if(user){
+            return res.status(200).json({
+                user
+            })
+        }
+    }catch(error){
+        return res.status(400).json({
+            message: errorHandler(error)
+        })
+    }
+}
+
+module.exports = { login, register, authUser }

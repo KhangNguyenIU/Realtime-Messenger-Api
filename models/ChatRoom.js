@@ -60,7 +60,6 @@ chatRoomSchema.statics.getChatroomsOfUser = async function (userId) {
         const chatrooms = await this.find({ participants: { $elemMatch: { $eq: userId } } })
             .populate({ path: 'participants', select: 'username avatar' })
 
-
         return chatrooms
     } catch (error) {
         throw "Error occur when get chatrooms of user"

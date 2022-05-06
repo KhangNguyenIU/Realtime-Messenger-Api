@@ -12,8 +12,10 @@ const Port = process.env.PORT || 8000
 
 const app = express()
 app.use(morgan('dev'))
-app.use(cors())
-app.use(helmet())
+app.use(cors({
+    origin: "*"
+}))
+// app.use(helmet())
 app.disable('x-powered-by')
 
 app.use(express.json())

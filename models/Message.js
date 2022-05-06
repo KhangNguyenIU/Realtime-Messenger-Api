@@ -56,4 +56,13 @@ messageSchema.statics.getConversationByRoomId = async function(chatRoomId){
         throw "Error in getConversationByRoomId"
     }
 }
+
+messageSchema.statics.getMessageById = async function(messageId){
+    try {
+        const message = await this.findById(messageId).populate({path:'postedBy', select:'username avatar'})
+        return message
+    } catch (error) {
+        throw "Error in get message"
+    }
+}
 module.exports = MessageSchema = mongoose.model("message",messageSchema)
