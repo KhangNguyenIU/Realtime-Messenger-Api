@@ -47,7 +47,7 @@ module.exports = function (io) {
 
     io.on('connection', socket => {
 
-        console.log("User connect---------",socket.id)
+        console.log("User connect---------", socket.id)
 
         socket.on('disconnect', () => {
             users = users.filter(user => user.socketId !== socket.id)
@@ -70,14 +70,17 @@ module.exports = function (io) {
             console.log(data)
         })
 
-        socket.on('send-message', async ({...fields}) => {
-            const {chatRoomId, message, postedBy} = fields
-            const newMessage = await MessageSchema.initMessage(message, chatRoomId, postedBy)
-            if(newMessage){
-                const message = await MessageSchema.getMessageById(newMessage._id)
-                if( message){
-                    io.to(chatRoomId).emit('recieve-message', message)
-                    io.to(chatRoomId).emit('notification', `${socket.id} has write sth ${message.message}`)
+        socket.on('send-message', async ({ ...fields }) => {
+            const { chatRoomId, message, postedBy } = fields
+            console.log("user", socket.id, "send message", message)
+            if (typeof message === 'string') {
+                const newMessage = await MessageSchema.initMessage(message, chatRoomId, postedBy)
+                if (newMessage) {
+                    const message = await MessageSchema.getMessageById(newMessage._id)
+                    if (message) {
+                        io.to(chatRoomId).emit('recieve-message', message)
+                        io.to(chatRoomId).emit('notification', `${socket.id} has write sth ${message.message}`)
+                    }
                 }
             }
         })
