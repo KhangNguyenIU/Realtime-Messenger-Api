@@ -76,15 +76,29 @@ module.exports = function (io) {
             if (typeof message === 'string') {
                 const newMessage = await MessageSchema.initMessage(message, chatRoomId, postedBy)
                 if (newMessage) {
-                    const message = await MessageSchema.getMessageById(newMessage._id)
+                    const processedMessage = await MessageSchema.getMessageById(newMessage._id)
                     if (message) {
-                        io.to(chatRoomId).emit('recieve-message', message)
+                        io.to(chatRoomId).emit('recieve-message', { chatRoomId, message: processedMessage })
                         io.to(chatRoomId).emit('notification', `${socket.id} has write sth ${message.message}`)
                     }
                 }
             }
         })
 
+        socket.on('user-typing', fields => {
+            const { chatRoomId, user } = fields
+            io.to(chatRoomId).emit('user-typing', {
+                user: user,
+                isTyping: true
+            })
+        })
 
+        socket.on('user-stop-typing', fields => {
+            const { chatRoomId, user } = fields
+            io.to(chatRoomId).emit('user-typing', {
+                user: user,
+                isTyping: false
+            })
+        })
     })
 }
