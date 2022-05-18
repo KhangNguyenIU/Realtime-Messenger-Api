@@ -45,6 +45,7 @@ module.exports = {
     getChatroomOfaUser: async (req, res) => {
         try {
             const chatrooms = await ChatRoomSchema.getChatroomsOfUser(req.user)
+
             if (chatrooms) {
                 return res.status(200).json({
                     chatrooms
@@ -121,5 +122,18 @@ module.exports = {
                 error: errorHandler(error)
             })
         }
-    }
+    },
+     getLastMessageOfChatroom : async (req, res)=>{
+         try {
+            const lastMessage = await ChatRoomSchema.getLastMessageOfChatroom(req.params.chatRoomId)
+            
+            return res.status(200).json({
+                lastMessage
+            })
+         }catch(error){
+             return res.status(400).json({
+                    error: errorHandler(error)
+             })
+         }
+     }
 }

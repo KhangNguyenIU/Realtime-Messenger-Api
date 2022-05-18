@@ -5,7 +5,8 @@ const MessageSchema = require('../models/Message');
 module.exports ={
     createMessage : async (req, res)=>{
         try {
-            const message = await MessageSchema.initMessage(req.body.message, req.params.chatRoomId, req.user)
+            const [message, chatRoom] = await MessageSchema.initMessage(req.body.message, req.params.chatRoomId, req.user)
+
             if(message){
                 return res.status(200).json({
                     message: "Message created successfully",
@@ -16,7 +17,7 @@ module.exports ={
                 message: "Cannot implement this action"
             })
         } catch (error) {
-            return res.staus(400).json({
+            return res.status(400).json({
                 error : errorHandler(error)
             })
         }
@@ -34,7 +35,7 @@ module.exports ={
                 message: "Cannot implement this action"
             })
         } catch (error) {
-            return res.staus(400).json({
+            return res.status(400).json({
                 error : errorHandler(error)
             })
         }

@@ -1,46 +1,5 @@
 const MessageSchema = require('../models/Message')
 
-// class WebSocket {
-//     users = []
-
-//     connection(client) {
-//         console.log("socket",global.io)
-//         client.on('disconnect', () => {
-//             this.users.filter(user => user.socketId !== client.id)
-//         })
-
-//         client.on('indentity', (userId) => {
-//             this.users.push({
-//                 socketId: client.id,
-//                 userId: userId
-//             })
-//             global.io.emit('hello',"users")
-//         })
-
-//         client.on('unsubcribe', () => {
-//             client.leave(room)
-//         })
-
-//         client.on("subscribe", (room, otherUserId = "") => {
-//             this.subscribeOtherUser(room, otherUserId);
-//             client.join(room);
-//         });
-//     }
-//     subcribeOtherUser(room, otherUserId) {
-//         const usersSocket = this.users.filter(user => user.userId === otherUserId)
-
-//         usersSocket.map(userInfo => {
-//             const socketCon = global.io.sockets.connected(userInfo.socketId)
-//             if (socketCon) {
-//                 socketCon.join(room)
-//             }
-//         })
-//     }
-// }
-
-// module.exports = new WebSocket()
-
-
 module.exports = function (io) {
 
     let users = []
@@ -72,14 +31,23 @@ module.exports = function (io) {
 
         socket.on('send-message', async ({ ...fields }) => {
             const { chatRoomId, message, postedBy } = fields
-            console.log("user", socket.id, "send message", message)
+            // console.log("user", socket.id, "send message", message)
+            let rawMessage = message
             if (typeof message === 'string') {
-                const newMessage = await MessageSchema.initMessage(message, chatRoomId, postedBy)
-                if (newMessage) {
-                    const processedMessage = await MessageSchema.getMessageById(newMessage._id)
-                    if (message) {
+                const [message, chatRoom] = await MessageSchema.initMessage(rawMessage, chatRoomId, postedBy)
+                if (message) {
+                    const processedMessage = await MessageSchema.getMessageById(message._id)
+                    if (processedMessage) {
                         io.to(chatRoomId).emit('recieve-message', { chatRoomId, message: processedMessage })
                         io.to(chatRoomId).emit('notification', `${socket.id} has write sth ${message.message}`)
+                       // get all client of a socket room
+
+                       for (let user of users){
+                           if(chatRoom.participants.indexOf(user.userId)!== -1){
+                            //    console.log(user)""
+                            socket.broadcast.to(user.socketId).emit("new-message-notify", {reload: true})
+                           }
+                       }
                     }
                 }
             }
@@ -99,6 +67,22 @@ module.exports = function (io) {
                 user: user,
                 isTyping: false
             })
+        })
+
+        socket.on('user-read-message',async(fields)=>{
+            const {user, message} = fields
+            // update message with user has been readed
+            if( user && message){
+                try{
+                    const updateMess = await MessageSchema.readedByUser(user, message)
+                    console.log("UPADTEAASD", updateMess)
+                    if(updateMess){
+                        socket.broadcast.to(socket.id).emit("new-message-notify", {reload: true})
+                    }
+                }catch(error){
+                    console.log(error)
+                }
+            }
         })
     })
 }

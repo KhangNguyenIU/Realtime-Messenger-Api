@@ -21,7 +21,10 @@ const chatRoomSchema = new mongoose.Schema({
         maxlength: 170
     },
     bio: { type: String, default: "", minlength: 0, maxlength: 170 },
-
+    messages: [
+        { type: mongoose.Types.ObjectId, ref: 'message' }
+    ],
+    theme: { type: String, default: "#E68585" }
 }, { timestamps: true })
 
 
@@ -48,6 +51,7 @@ chatRoomSchema.statics.deleteChatRoom = async function (chatRoomId) {
 
 chatRoomSchema.statics.getChatroom = async function (chatRoomId) {
     try {
+        //findbyid and sort by updated
         const chatRoom = await this.findById(chatRoomId)
         return chatRoom
     } catch (error) {
@@ -57,9 +61,16 @@ chatRoomSchema.statics.getChatroom = async function (chatRoomId) {
 
 chatRoomSchema.statics.getChatroomsOfUser = async function (userId) {
     try {
-        const chatrooms = await this.find({ participants: { $elemMatch: { $eq: userId } } })
+        const chatrooms = await this.find({ participants: { $elemMatch: { $eq: userId } } }, null, { sort: "-updatedAt" })
             .populate({ path: 'participants', select: 'username avatar' })
-
+            .populate({
+                path: 'messages', select: 'message postedBy createdAt',
+                options: {
+                    limit: 1, sort: { 'createdAt': -1 }
+                },
+                populate: { path: 'postedBy', select: 'username avatar' },
+                populate:{ path:'readByRecipients', selec: 'readByUserId readAt'}
+            })
         return chatrooms
     } catch (error) {
         throw "Error occur when get chatrooms of user"
@@ -97,16 +108,16 @@ chatRoomSchema.statics.addParticipant = async function (chatRoomId, userId) {
 chatRoomSchema.statics.updateChatroomInfo = async function (chatRoomId, fields = {}) {
     try {
         const { name, bio, avatar } = fields
-         const updateChatroom = {
-                ...(name && { name }),
-                ...(bio && { bio }),
-                ...(avatar && { avatar })
-            }
+        const updateChatroom = {
+            ...(name && { name }),
+            ...(bio && { bio }),
+            ...(avatar && { avatar })
+        }
 
         let chatRoom = await this.findByIdAndUpdate(chatRoomId, updateChatroom)
-        
+
         return chatRoom
-  
+
     } catch (error) {
         throw "Error occur when update chatroom"
     }
