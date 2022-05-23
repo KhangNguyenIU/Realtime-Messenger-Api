@@ -16,15 +16,17 @@ const chatRoomSchema = new mongoose.Schema({
     ],
     avatar: {
         type: String,
-        default: "https://png.pngtree.com/png-clipart/20190904/original/pngtree-hand-drawn-flat-wind-user-avatar-icon-png-image_4492039.jpg",
+        default: "https://images.unsplash.com/photo-1652794878123-bc3049bf4120?crop=entropy&cs=tinysrgb&fm=jpg&ixlib=rb-1.2.1&q=80&raw_url=true&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387",
         minlength: 0,
-        maxlength: 170
+        maxlength: 300
     },
     bio: { type: String, default: "", minlength: 0, maxlength: 170 },
     messages: [
         { type: mongoose.Types.ObjectId, ref: 'message' }
     ],
-    theme: { type: String, default: "#E68585" }
+    theme: { type: String, default: "#E68585" },
+    autoDelete: { type: Boolean, default: false },
+    duration: { type: Number, default: 0 },
 }, { timestamps: true })
 
 
@@ -64,12 +66,13 @@ chatRoomSchema.statics.getChatroomsOfUser = async function (userId) {
         const chatrooms = await this.find({ participants: { $elemMatch: { $eq: userId } } }, null, { sort: "-updatedAt" })
             .populate({ path: 'participants', select: 'username avatar' })
             .populate({
-                path: 'messages', select: 'message postedBy createdAt',
+                path: 'messages', select: 'message postedBy createdAt type',
                 options: {
-                    limit: 1, sort: { 'createdAt': -1 }
+                    limit: 2, sort: { 'createdAt': -1 }
                 },
-                populate: { path: 'postedBy', select: 'username avatar' },
-                populate:{ path:'readByRecipients', selec: 'readByUserId readAt'}
+                populate: [{ path: 'postedBy', select: 'username avatar' },
+                { path: 'readByRecipients', select: 'readByUserId readAt' }
+                ],
             })
         return chatrooms
     } catch (error) {

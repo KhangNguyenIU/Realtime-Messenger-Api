@@ -5,7 +5,7 @@ module.exports = {
     createChatRoom: async (req, res) => {
         try {
             const newRoom = await ChatRoomSchema.initChatroom(req.user, req.body.participants, req.body.name)
-            console.log({ newRoom })
+            // console.log({ newRoom })
             if (newRoom) {
                 return res.status(200).json({ newRoom })
             }

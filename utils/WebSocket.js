@@ -1,5 +1,8 @@
 const MessageSchema = require('../models/Message')
+const autoDelete = require('../utils/autoDelete')
+const {cloudinary} = require('../config/cloudinary')
 
+const { TYPE_IMAGE, TYPE_TEXT} = require('../constants/')
 module.exports = function (io) {
 
     let users = []
@@ -30,27 +33,48 @@ module.exports = function (io) {
         })
 
         socket.on('send-message', async ({ ...fields }) => {
-            const { chatRoomId, message, postedBy } = fields
-            // console.log("user", socket.id, "send message", message)
+            const { chatRoomId, message, postedBy, type } = fields
             let rawMessage = message
-            if (typeof message === 'string') {
-                const [message, chatRoom] = await MessageSchema.initMessage(rawMessage, chatRoomId, postedBy)
-                if (message) {
-                    const processedMessage = await MessageSchema.getMessageById(message._id)
-                    if (processedMessage) {
-                        io.to(chatRoomId).emit('recieve-message', { chatRoomId, message: processedMessage })
-                        io.to(chatRoomId).emit('notification', `${socket.id} has write sth ${message.message}`)
-                       // get all client of a socket room
+            if (typeof message !== 'string')
+                return;
+            try {
+                //! If message is image : upload to cloudinary return url
+                if (type === TYPE_IMAGE) {
+                    const imageUrl = await cloudinary.uploader.upload(rawMessage, {
+                        upload_preset: 'cloud_set'
+                    })
+                    if(!imageUrl)
+                        return
+                    rawMessage = imageUrl.url
+                }
 
-                       for (let user of users){
-                           if(chatRoom.participants.indexOf(user.userId)!== -1){
-                            //    console.log(user)""
-                            socket.broadcast.to(user.socketId).emit("new-message-notify", {reload: true})
-                           }
-                       }
+                const [message, chatRoom] = await MessageSchema.initMessage(rawMessage, chatRoomId, postedBy, type)
+                if (!message || !chatRoom)
+                    return;
+
+                //! check if message in auto delete mode 
+                //! if yes, then delete message after x seconds
+                if (chatRoom.autoDelete) {
+                    autoDelete.add(chatRoom._id, message._id, chatRoom.duration)
+                }
+                const processedMessage = await MessageSchema.getMessageById(message._id)
+                if (!processedMessage)
+                    return;
+
+                io.to(chatRoomId).emit('recieve-message', { chatRoomId, message: processedMessage })
+                io.to(chatRoomId).emit('notification', `${socket.id} has write sth ${message.message}`)
+                // get all client of a socket room
+
+                for (let user of users) {
+                    if (chatRoom.participants.indexOf(user.userId) !== -1) {
+
+                        socket.broadcast.to(user.socketId).emit("new-message-notify", { reload: true })
                     }
                 }
+            } catch (error) {
+                console.log(error)
             }
+
         })
 
         socket.on('user-typing', fields => {
@@ -69,20 +93,29 @@ module.exports = function (io) {
             })
         })
 
-        socket.on('user-read-message',async(fields)=>{
-            const {user, message} = fields
-            // update message with user has been readed
-            if( user && message){
-                try{
-                    const updateMess = await MessageSchema.readedByUser(user, message)
-                    console.log("UPADTEAASD", updateMess)
-                    if(updateMess){
-                        socket.broadcast.to(socket.id).emit("new-message-notify", {reload: true})
+        socket.on('user-read-message', async (fields) => {
+            const { user, message } = fields
+            if (!user || !message)
+                return;
+
+            try {
+                const updateMess = await MessageSchema.readedByUser(user, message)
+                // console.log("UPADTEAASD", updateMess)
+                if (updateMess) {
+                    console.log("broadcast", socket.id)
+                    console.log("--", users)
+                    for (let socketUser of users) {
+                        if (socketUser.userId === user) {
+                            console.log("emit", socketUser.socketId)
+                            // io.broadcast.to(socketUser.socketId).emit("newF-notify", {reload: true})
+                            socket.emit('user-read-message', { reload: true })
+                        }
                     }
-                }catch(error){
-                    console.log(error)
                 }
+            } catch (error) {
+                console.log(error)
             }
+
         })
     })
 }

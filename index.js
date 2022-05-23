@@ -3,14 +3,21 @@ const morgan = require('morgan')
 const cors = require('cors')
 const http = require('http')
 const helmet = require('helmet')
+// const cloudinary = require('cloudinary')
+
+// cloudinary.config({
+//     cloud_name: process.env.CLOUDINARY_NAME || "dmdiv5ldu",
+//     api_key: process.env.CLOUDINARY_API_KEY || "541435637713187",
+//     api_secret: process.env.CLOUDINARY_API_SECRET || "axDu_iiz0N_xXAAxFFF1bycN7r0"
+// })
 
 require('dotenv').config()
 require('./config/mongo')
 
-
 const Port = process.env.PORT || 8000
 
 const app = express()
+
 app.use(morgan('dev'))
 app.use(cors({
     origin: "*"
@@ -18,8 +25,8 @@ app.use(cors({
 // app.use(helmet())
 app.disable('x-powered-by')
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb' }))
 
 app.use('/api/auth', require('./routes/auth.route'))
 app.use('/api/user', require('./routes/user.route'))
@@ -37,8 +44,10 @@ const socketIo = require('socket.io')(server, {
         credentials: true
     }
 })
-
+global.io = socketIo
 require('./utils/WebSocket')(socketIo)
+
+const autoDelete = require('./utils/autoDelete')
 
 server.listen(Port, () => {
     console.log("Server is running on port " + Port)

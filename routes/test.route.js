@@ -1,8 +1,8 @@
 const express = require('express')
-const res = require('express/lib/response')
+const { test } = require('../controllers/test.controller')
 
 const route = express.Router()
 
-route.get('/', (req, res)=>res.send("hello"))
+route.post('/', test)
 
 module.exports = route
