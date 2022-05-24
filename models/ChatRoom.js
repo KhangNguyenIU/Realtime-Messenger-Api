@@ -64,7 +64,15 @@ chatRoomSchema.statics.getChatroom = async function (chatRoomId) {
 chatRoomSchema.statics.getChatroomsOfUser = async function (userId) {
     try {
         const chatrooms = await this.find({ participants: { $elemMatch: { $eq: userId } } }, null, { sort: "-updatedAt" })
-            .populate({ path: 'participants', select: 'username avatar' })
+            .populate({
+                path: 'participants', select: 'username avatar isOnline lastOnline',
+                options: {
+                    sort: {
+                        'isOnline': -1
+                    }
+                }
+
+            })
             .populate({
                 path: 'messages', select: 'message postedBy createdAt type',
                 options: {

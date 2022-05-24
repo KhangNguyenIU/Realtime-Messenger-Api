@@ -20,11 +20,13 @@ const app = express()
 
 app.use(morgan('dev'))
 app.use(cors({
-    origin: "*"
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 }))
+
 // app.use(helmet())
 app.disable('x-powered-by')
-
+app.use(helmet())
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ limit: '50mb' }))
 

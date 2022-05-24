@@ -3,6 +3,7 @@ const autoDelete = require('../utils/autoDelete')
 const {cloudinary} = require('../config/cloudinary')
 
 const { TYPE_IMAGE, TYPE_TEXT} = require('../constants/')
+const UserSchema = require('../models/User')
 module.exports = function (io) {
 
     let users = []
@@ -12,11 +13,27 @@ module.exports = function (io) {
         console.log("User connect---------", socket.id)
 
         socket.on('disconnect', () => {
+            console.log("disconect")
+            const offUser = users.find(x=>x.socketId === socket.id)
+            console.log(offUser)
             users = users.filter(user => user.socketId !== socket.id)
+            try {
+                if(offUser){
+                    UserSchema.updateUserOnlineStatus(offUser.userId, false)
+                }
+            } catch (error) {
+                console.log(error)
+            }
         })
 
-        socket.on('identity', userId => {
+        socket.on('identity', async(userId) => {
+            console.log("identity")
             users.push({ socketId: socket.id, userId })
+            try {
+                const updated = await UserSchema.updateUserOnlineStatus(userId, true)
+            } catch (error) {
+                console.log(error)
+            }
         })
 
         socket.on('leaveRoom', roomId => {

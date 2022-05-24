@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const _ = require('lodash')
+const { ACCOUNT_TYPE_USER } = require('../constants')
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -33,6 +34,9 @@ const userSchema = new mongoose.Schema({
         minlength: 0,
         maxlength: 170
     },
+    isOnline: { type: Boolean, default: false },
+    lastOnline: { type: Date, default: Date.now() },
+    accountType: { type: String, default: ACCOUNT_TYPE_USER },
 }, { timestamps: true })
 
 userSchema.statics.createUser = async function (username, email, password) {
@@ -63,6 +67,16 @@ userSchema.statics.findByEmail = async function (email) {
     }
 }
 
+//find user by id
+userSchema.statics.findById = async function (id) {
+    try {
+        const user = await this.findOne({ _id: id })
+        return user;
+    } catch (error) {
+        throw "Error occur when find user by id"
+    }
+}
+
 userSchema.statics.findByToken = async function (token) {
     try {
         const user = await this.findOne({ _id: token }).select('-password -salt')
@@ -73,10 +87,11 @@ userSchema.statics.findByToken = async function (token) {
 }
 
 
-userSchema.statics.updateUser = async function (email, fields = {}) {
+userSchema.statics.updateUser = async function (id, fields = {}) {
     try {
         const { username, bio, password } = fields
-        let user = await this.findByEmail(email)
+        let user = await this.findById(id)
+        console.log(user, id)
         if (user) {
             const updateUser = {
                 ...(username && { username }),
@@ -90,7 +105,20 @@ userSchema.statics.updateUser = async function (email, fields = {}) {
     } catch (error) {
         throw "Error occur when update user"
     }
+}
 
+userSchema.statics.updateUserOnlineStatus = async function (id, isOnline){
+    try {
+        const user = await this.findById(id)
+        if(user){
+            user.isOnline = isOnline
+            user.lastOnline = Date.now()
+            await user.save()
+            return user
+        }
+    } catch (error) {
+        throw "Error occur when update user online status"
+    }
 }
 
 //validate password
