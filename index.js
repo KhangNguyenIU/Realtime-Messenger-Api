@@ -42,6 +42,7 @@ const socketIo = require('socket.io')(server, {
     // allowEIO3: true,
     cors: {
         origin: ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
+        allowedHeaders:["secretHeader"],
         methods: ['GET', 'POST'],
         credentials: true
     }
