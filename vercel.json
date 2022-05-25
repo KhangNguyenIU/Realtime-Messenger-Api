@@ -1,0 +1,10 @@
+{
+    "version": 1,
+    "name": "messenger",
+    "builds": [
+       { "src": "index.js", "use": "@vercel/node" }
+    ],
+    "routes": [
+       { "src": "/(.*)", "dest": "/" }
+    ]
+ }
