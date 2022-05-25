@@ -39,9 +39,9 @@ app.use('/api/test', require('./routes/test.route'))
 const server = http.createServer(app)
 
 const socketIo = require('socket.io')(server, {
-    allowEIO3: true,
+    // allowEIO3: true,
     cors: {
-        origin: "https://wad-chat-app-frontend.vercel.app",
+        origin: ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
         methods: ['GET', 'POST'],
         credentials: true
     }
