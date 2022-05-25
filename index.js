@@ -46,6 +46,16 @@ const socketIo = require('socket.io')(server, {
         methods: ['GET', 'POST'],
         credentials: true
     }
+    ,
+    handlePreflightRequest: (req, res) => {
+        res.writeHead(200, {
+          "Access-Control-Allow-Origin": ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
+          "Access-Control-Allow-Methods": "GET,POST",
+          "Access-Control-Allow-Headers": "secretHeader",
+          "Access-Control-Allow-Credentials": true
+        });
+        res.end();
+      }
 })
 global.io = socketIo
 require('./utils/WebSocket')(socketIo)
