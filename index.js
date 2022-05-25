@@ -41,7 +41,7 @@ const server = http.createServer(app)
 const socketIo = require('socket.io')(server, {
     allowEIO3: true,
     cors: {
-        origin: "https://wad-chat-app-frontend.vercel.app/",
+        origin: "https://wad-chat-app-frontend.vercel.app",
         methods: ['GET', 'POST'],
         credentials: true
     }
