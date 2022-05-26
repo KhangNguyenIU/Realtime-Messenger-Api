@@ -20,7 +20,7 @@ const app = express()
 
 app.use(morgan('dev'))
 app.use(cors({
-    origin: "*",
+    origin:  ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 }))
 
@@ -39,13 +39,13 @@ app.use('/api/test', require('./routes/test.route'))
 const server = http.createServer(app)
 
 const socketIo = require('socket.io')(server, {
-    // allowEIO3: true,
-    // cors: {
-    //     origin: ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
-    //     allowedHeaders:["secretHeader"],
-    //     methods: ['GET', 'POST'],
-    //     credentials: true
-    // }
+    allowEIO3: true,
+    cors: {
+        origin: ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
+        allowedHeaders:["secretHeader"],
+        methods: ['GET', 'POST'],
+        credentials: true
+    }
     // ,
     // handlePreflightRequest: (req, res) => {
     //     res.writeHead(200, {
@@ -56,9 +56,9 @@ const socketIo = require('socket.io')(server, {
     //     });
     //     res.end();
     //   }
-    cors: {
-        origin : "*"
-    }
+    // cors: {
+    //     origin : "*"
+    // }
 })
 global.io = socketIo
 require('./utils/WebSocket')(socketIo)
