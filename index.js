@@ -42,23 +42,11 @@ const socketIo = require('socket.io')(server, {
     allowEIO3: true,
     cors: {
         origin: ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
-        allowedHeaders:["secretHeader"],
+        // allowedHeaders:["secretHeader"],
         methods: ['GET', 'POST'],
-        credentials: true
+        // credentials: true
     }
-    // ,
-    // handlePreflightRequest: (req, res) => {
-    //     res.writeHead(200, {
-    //       "Access-Control-Allow-Origin": ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
-    //       "Access-Control-Allow-Methods": "GET,POST",
-    //       "Access-Control-Allow-Headers": "secretHeader",
-    //       "Access-Control-Allow-Credentials": true
-    //     });
-    //     res.end();
-    //   }
-    // cors: {
-    //     origin : "*"
-    // }
+ 
 })
 global.io = socketIo
 require('./utils/WebSocket')(socketIo)
