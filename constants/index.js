@@ -1,5 +1,5 @@
 //Regex
-exports.PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{6,}$/
+exports.PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}/
 
 //MessageType
 exports.TYPE_TEXT ="TEXT"
