@@ -61,5 +61,18 @@ module.exports = {
                 error: errorHandler(error)
             })
         }
+    },
+    getUserList: async (req, res) => {
+        try {
+            console.log("hello")
+            const userList = await UserSchema.getUserList(req.user)
+            return res.status(200).json({
+                users: userList
+            })
+        } catch (error) {
+            return res.status(400).json({
+                error: errorHandler(error)
+            })
+        }
     }
 }

@@ -107,10 +107,10 @@ userSchema.statics.updateUser = async function (id, fields = {}) {
     }
 }
 
-userSchema.statics.updateUserOnlineStatus = async function (id, isOnline){
+userSchema.statics.updateUserOnlineStatus = async function (id, isOnline) {
     try {
         const user = await this.findById(id)
-        if(user){
+        if (user) {
             user.isOnline = isOnline
             user.lastOnline = Date.now()
             await user.save()
@@ -118,6 +118,19 @@ userSchema.statics.updateUserOnlineStatus = async function (id, isOnline){
         }
     } catch (error) {
         throw "Error occur when update user online status"
+    }
+}
+
+// Find list of user except current user
+userSchema.statics.getUserList = async function (id) {
+    try {
+        const users = await this.find({ _id: { $ne: id } }).select('-password -salt')
+        if (users) {
+            return users
+        }
+        return null
+    } catch (error) {
+        throw "Error occur when get user list"
     }
 }
 
