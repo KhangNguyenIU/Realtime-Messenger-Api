@@ -134,4 +134,14 @@ chatRoomSchema.statics.updateChatroomInfo = async function (chatRoomId, fields =
     }
 }
 
+chatRoomSchema.statics.turnAutoDelete = async function (chatRoomId, autoDelete, duration) {
+    try {
+        const chatRoom = await this.findByIdAndUpdate(chatRoomId, { autoDelete, duration })
+        return chatRoom
+    } catch (error) {
+        throw "Error occur when turn auto delete"
+    }
+}
+
+
 module.exports = ChatRoomSchema = mongoose.model("chatRoom", chatRoomSchema)

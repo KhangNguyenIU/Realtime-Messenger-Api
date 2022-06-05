@@ -39,5 +39,24 @@ module.exports ={
                 error : errorHandler(error)
             })
         }
+    },
+    getImagesOfConversation : async (req, res)=>{
+        try {
+            const messages = await MessageSchema.getImagesOfConversation(req.params.chatRoomId)
+            console.log({messages})
+            if(messages){
+                return res.status(200).json({
+                    message: "Images fetched successfully",
+                    data: messages
+                })
+            }
+            return res.status(400).json({
+                message: "Cannot implement this action"
+            })
+        } catch (error) {
+            return res.status(400).json({
+                error : errorHandler(error)
+            })
+        }
     }
 }

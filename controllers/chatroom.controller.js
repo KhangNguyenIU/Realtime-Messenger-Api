@@ -110,7 +110,7 @@ module.exports = {
             const updatedRoom = await ChatRoomSchema.updateChatroomInfo(chatroomId, { bio, name, avatar })
 
             if (updatedRoom) {
-                return res.status(200).json({        
+                return res.status(200).json({
                     message: "Update room info success"
                 })
             }
@@ -123,17 +123,41 @@ module.exports = {
             })
         }
     },
-     getLastMessageOfChatroom : async (req, res)=>{
-         try {
+    getLastMessageOfChatroom: async (req, res) => {
+        try {
             const lastMessage = await ChatRoomSchema.getLastMessageOfChatroom(req.params.chatRoomId)
-            
+
             return res.status(200).json({
                 lastMessage
             })
-         }catch(error){
-             return res.status(400).json({
-                    error: errorHandler(error)
-             })
-         }
-     }
+        } catch (error) {
+            return res.status(400).json({
+                error: errorHandler(error)
+            })
+        }
+    },
+    turnAutoDelete: async (req, res) => {
+        try {
+            const {duration, autoDelete} = req.body
+            console.log({duration, autoDelete})
+            const chatroom = await ChatRoomSchema.getChatroom(req.params.chatRoomId)
+            if (chatroom) {
+
+                const newRoom = await ChatRoomSchema.turnAutoDelete(req.params.chatRoomId, autoDelete, Number(duration))
+                if (newRoom) {
+                    return res.status(200).json({
+                        message: "Auto delete turn on"
+                    })
+                }
+
+            }
+            return res.status(400).json({
+                error: "Error occur when turn auto delete"
+            })
+        } catch (error) {
+            return res.status(400).json({
+                error: errorHandler(error)
+            })
+        }
+    }
 }

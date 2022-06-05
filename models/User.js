@@ -24,9 +24,9 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-        default: "https://png.pngtree.com/png-clipart/20190904/original/pngtree-hand-drawn-flat-wind-user-avatar-icon-png-image_4492039.jpg",
+        default: "https://images.unsplash.com/photo-1605462863863-10d9e47e15ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80",
         minlength: 0,
-        maxlength: 170
+        maxlength: 300
     },
     bio: {
         type: String,

@@ -3,19 +3,14 @@ const morgan = require('morgan')
 const cors = require('cors')
 const http = require('http')
 const helmet = require('helmet')
-// const cloudinary = require('cloudinary')
 
-// cloudinary.config({
-//     cloud_name: process.env.CLOUDINARY_NAME || "dmdiv5ldu",
-//     api_key: process.env.CLOUDINARY_API_KEY || "541435637713187",
-//     api_secret: process.env.CLOUDINARY_API_SECRET || "axDu_iiz0N_xXAAxFFF1bycN7r0"
-// })
 
 require('dotenv').config()
+
 require('./config/mongo')
+// require('./config/redis')
 
 const Port = process.env.PORT || 8000
-
 const app = express()
 
 app.use(morgan('dev'))
@@ -28,7 +23,7 @@ app.use(cors({
 app.disable('x-powered-by')
 app.use(helmet())
 app.use(express.json({ limit: '50mb' }))
-app.use(express.urlencoded({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
 app.use('/api/auth', require('./routes/auth.route'))
 app.use('/api/user', require('./routes/user.route'))
@@ -42,12 +37,11 @@ const socketIo = require('socket.io')(server, {
     allowEIO3: true,
     cors: {
         origin: ["https://wad-chat-app-frontend.vercel.app","http://localhost:3000"],
-        // allowedHeaders:["secretHeader"],
         methods: ['GET', 'POST'],
-        // credentials: true
     }
  
 })
+
 global.io = socketIo
 require('./utils/WebSocket')(socketIo)
 

@@ -73,6 +73,15 @@ messageSchema.statics.getConversationByRoomId = async function (chatRoomId) {
     }
 }
 
+messageSchema.statics.getImagesOfConversation = async function (chatRoomId) {
+    try {
+        const messages = await this.find({ chatRoomId, type: MessageType.TYPE_IMAGE }).populate({ path: 'postedBy', select: 'username avatar' })
+        return messages
+    } catch (error) {
+        throw "Error in get images of conversation"
+    }
+}
+
 messageSchema.statics.getMessageById = async function (messageId) {
     try {
         const message = await this.findById(messageId).populate({ path: 'postedBy', select: 'username avatar' })
